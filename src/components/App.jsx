@@ -8,44 +8,25 @@ export class App extends React.Component {
     good: 0,
     neutral: 0,
     bad: 0,
-    total: 0,
-    positivePercentage: 0,
+
   };
-  countGood = () => {
-    this.setState(prevState => ({ good: prevState.good + 1 }));
-    this.countTotal();
-  };
-  countNeutral = () => {
+  onLeaveFeedback = type => {
     this.setState(prevState => ({
-      neutral: prevState.neutral + 1,
+      [type]: prevState[type] + 1,
     }));
-    this.countTotal();
-  };
-  countBad = () => {
-    this.setState(prevState => ({
-      bad: prevState.bad + 1,
-    }));
-    this.countTotal();
   };
   countTotal = () => {
-    // ? без setTimeout не записую 1й раз тотал?
-    setTimeout(() => {
-      this.setState({
-        total: this.state.good + this.state.neutral + this.state.bad,
-      });
-      this.countPositiveFeedbackPercentage();
-    });
+    const { good, neutral, bad } = this.state;
+    return good + neutral + bad;
   };
   countPositiveFeedbackPercentage = () => {
-    setTimeout(() => {
-      const { good, total } = this.state;
-      const positivePercentage = Math.round((good / total) * 100);
-      this.setState({ positivePercentage });
-      console.log(positivePercentage);
-    });
+    return Math.round((this.state.good / this.countTotal()) * 100);
   };
 
   render() {
+    const { good, neutral, bad } = this.state;
+    const positivePercentage = this.countPositiveFeedbackPercentage();
+    const total = this.countTotal();
     return (
       <div
         style={{
@@ -57,21 +38,20 @@ export class App extends React.Component {
       >
         <Section title="Please leave feedback">
           <FeedbackOptions
-            countGood={this.countGood}
-            countNeutral={this.countNeutral}
-            countBad={this.countBad}
-          ></FeedbackOptions>
+            onLeaveFeedback={this.onLeaveFeedback}
+            options={Object.keys(this.state)}
+          />
         </Section>
         <Section title="Statistics">
           {this.state.total === 0 ? (
             'There is no feedback'
           ) : (
             <Statistics
-              good={this.state.good}
-              neutral={this.state.neutral}
-              bad={this.state.bad}
-              total={this.state.total}
-              positivePercentage={this.state.positivePercentage}
+              good={good}
+              neutral={neutral}
+              bad={bad}
+              total={total}
+              positivePercentage={positivePercentage}
             />
           )}
         </Section>
